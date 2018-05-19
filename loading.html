@@ -1,0 +1,88 @@
+<html>
+  <body>
+    <svg id="svg" height="120" width="300"></svg>
+    <script src="http://cdn.jsdelivr.net/npm/velocity-animate@2.0/velocity.min.js"></script>
+    <script>
+
+      const parent = document.getElementById('svg')
+
+      // const colors = [
+      //     'rgba(3, 169, 244, 1)',
+      //     'rgba(244, 67, 54, 1)',
+      //     'rgba(255, 235, 59, 1)',
+      //     'rgba(76, 175, 80, 1)',
+      //     'rgba(156, 39, 176, 1)'
+      // ]
+
+      const colors = [
+        'rgba(211, 47, 47, 1)',
+        'rgba(255, 87, 34, 1)',
+        'rgba(255, 235, 59, 1)',
+        'rgba(76, 175, 80, 1)',
+        'rgba(33, 150, 243, 1)',
+        'rgba(0, 188, 212, 1)',
+        'rgba(156, 39, 176, 1)'
+      ]
+
+      const prefix            = 'dot'
+      const xOrigin           = 25
+      const xEnd              = 275
+      const yOrigin           = 60
+      const radius            = 2
+
+      const amplification     = 5
+      const oscillationCount  = 3.5
+      const peak              = 50
+
+      const animationDuration = 3000
+      const animationDelay    = 150
+
+      Velocity("registerEasing","bell", function(percent, start, end, property) {
+        return start + Math.pow(Math.sin(percent * Math.PI),2) * amplification
+      })
+      Velocity("registerEasing", "oscillate", function(percent, start, end, property) {
+        return start + Math.sin(((percent * oscillationCount * 360) % 360) / 180 * Math.PI) * Math.pow(Math.sin(percent * Math.PI),3) * peak
+      })
+
+      function newDot(parent, id, cx, cy, r, color) {
+        var element = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+        element.setAttribute('id', id)
+        element.setAttribute('cx', cx)
+        element.setAttribute('cy', cy)
+        element.setAttribute('r', r)
+        element.setAttribute('fill', color)
+        parent.appendChild(element)
+      }
+
+      function createDots(parent, id, cx, cy, r, colors) {
+        for(var i = 0; i < colors.length; i++) {
+          newDot(parent, id + '-' + i, cx, cy, r, colors[i])
+        }
+      }
+
+      function animate(element, x, y, r, duration, delay) {
+        setTimeout( _ => {
+          document.querySelector(element).velocity({
+            r: [r + 0.001, "bell"],
+            cx: [x, "linear"],
+            cy: [y + 0.001, "oscillate"]
+          }, {
+            easing: "linear",
+            duration: duration,
+            loop: true
+          })
+        }, delay)
+      }
+
+      function start(element, x, y, r, duration, delay, count) {
+        for(var i = 0; i < count; i++) {
+          animate('#' + element + '-' + i, x, y, r, duration, delay * i)
+        }
+      }
+
+      createDots(parent, prefix, xOrigin, yOrigin, radius, colors)
+      start(prefix, xEnd, yOrigin, radius, animationDuration, animationDelay, colors.length)
+
+    </script>
+  </body>
+</html>
