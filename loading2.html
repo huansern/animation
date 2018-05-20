@@ -1,0 +1,105 @@
+<html>
+  <body>
+    <svg id="svg"></svg>
+    <script src="http://cdn.jsdelivr.net/npm/velocity-animate@2.0/velocity.min.js"></script>
+    <script>
+
+      const colors = [
+          'rgba(3, 169, 244, 1)',
+          'rgba(244, 67, 54, 1)',
+          'rgba(255, 235, 59, 1)',
+          'rgba(76, 175, 80, 1)',
+          'rgba(156, 39, 176, 1)'
+      ]
+
+      // const colors = [
+      //   'rgba(211, 47, 47, 1)',
+      //   'rgba(255, 87, 34, 1)',
+      //   'rgba(255, 235, 59, 1)',
+      //   'rgba(76, 175, 80, 1)',
+      //   'rgba(33, 150, 243, 1)',
+      //   'rgba(0, 188, 212, 1)',
+      //   'rgba(156, 39, 176, 1)'
+      // ]
+
+      const prefix            = 'box'
+      const xOrigin           = 10
+      const yOrigin           = 20
+      const size              = 20
+
+      const animationDelay    = 1000
+      const animationDuration = animationDelay *  colors.length
+
+      const svgWidth = xOrigin * 2 + ((colors.length) * 2 + 1) * size
+      const svgHeight = yOrigin * 2 + size
+
+      const parent = document.getElementById('svg')
+      parent.setAttribute('width', svgWidth)
+      parent.setAttribute('height', svgHeight)
+
+      const turns = colors.length * 2
+      // const percentPerTurn = 1 / turns
+      // const complementPercentPerTurn = 1 - percentPerTurn
+
+      Velocity("registerEasing", "jump", function(percent, start, end, property) {
+        return start + (end - start) * (Math.floor(Math.ceil(percent * 90 * turns) / 90)) / turns
+      })
+
+      Velocity("registerEasing", "rotate", function(percent, start, end, property) {
+        return Math.ceil(percent * 90 * turns) % 90
+      })
+
+      Velocity("registerEasing", "delayFade", function(percent, start, end, property) {
+        return Math.sin(percent *  Math.PI)
+        // return (percent < percentPerTurn) ? (percent * turns) : ((percent < complementPercentPerTurn) ? 1 : ((percentPerTurn - (percent - complementPercentPerTurn)) / percentPerTurn))
+      })
+
+      function newRect(parent, id, x, y, s, color) {
+        let offset = yOrigin + size
+        var element = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        element.setAttribute('id', id)
+        element.setAttribute('x', x)
+        element.setAttribute('y', y)
+        element.setAttribute('width', s)
+        element.setAttribute('height', s)
+        element.setAttribute('fill', color)
+        element.setAttribute('opacity', 0)
+        element.setAttribute('style', '-webkit-transform-origin-y: ' + offset + 'px;')
+        parent.appendChild(element)
+      }
+
+      function createRects(parent, id, x, y, s, colors) {
+        for(var i = 0; i < colors.length; i++) {
+          newRect(parent, id + '-' + i, x, y, s, colors[i])
+        }
+      }
+
+      function animate(element, x, y, s, duration, delay) {
+        setTimeout( _ => {
+          let start = x + s
+          let end = x + s * (turns + 1)
+          document.querySelector(element).velocity({
+            x: [x + s * turns, "jump", x],
+            transform: ['rotate(90deg)', "rotate", 'rotate(0deg)'],
+            transformOriginX: [ end + 'px', "jump", start + "px"],
+            opacity: [0.001, "delayFade", 0]
+          }, {
+            easing: "linear",
+            duration: duration,
+            repeat: true
+          })
+        }, delay)
+      }
+
+      function start(element, x, y, s, duration, delay, count) {
+        for(var i = 0; i < count; i++) {
+          animate('#' + element + '-' + i, x, y, s, duration, delay * i)
+        }
+      }
+
+      createRects(parent, prefix, xOrigin, yOrigin, size, colors)
+      start(prefix, xOrigin, yOrigin, size, animationDuration, animationDelay, colors.length)
+
+    </script>
+  </body>
+</html>
