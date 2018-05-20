@@ -43,6 +43,10 @@
       Velocity("registerEasing", "oscillate", function(percent, start, end, property) {
         return start + Math.sin(((percent * oscillationCount * 360) % 360) / 180 * Math.PI) * Math.pow(Math.sin(percent * Math.PI),3) * peak
       })
+      
+      Velocity("registerEasing", "delayFade", function(percent, start, end, property) {
+        return Math.sin(percent *  Math.PI)
+      })
 
       function newDot(parent, id, cx, cy, r, color) {
         var element = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
@@ -51,6 +55,7 @@
         element.setAttribute('cy', cy)
         element.setAttribute('r', r)
         element.setAttribute('fill', color)
+        element.setAttribute('opacity', 0)
         parent.appendChild(element)
       }
 
@@ -65,7 +70,8 @@
           document.querySelector(element).velocity({
             r: [r + 0.001, "bell"],
             cx: [x, "linear"],
-            cy: [y + 0.001, "oscillate"]
+            cy: [y + 0.001, "oscillate"],
+            opacity: [0.001, "delayFade", 0]
           }, {
             easing: "linear",
             duration: duration,
